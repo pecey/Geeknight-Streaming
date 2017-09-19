@@ -1,0 +1,7 @@
+# Folders
+.idea/
+target/
+
+# Files
+config.properties
+*.iml
