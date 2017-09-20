@@ -1,6 +1,7 @@
 package com.thoughtworks.geeknight.streaming.source;
 
 import com.thoughtworks.geeknight.streaming.kafka.Producer;
+import com.thoughtworks.geeknight.streaming.storm.*;
 import twitter4j.*;
 import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
@@ -19,10 +20,12 @@ public class StreamSource {
     Producer producer = new Producer();
     String topicToSendTo = "test";
 
+//    Spout spout = new Spout();
     twitterStream.addListener(new StatusListener() {
       @Override
       public void onStatus(Status status) {
-        producer.send(topicToSendTo, status.getText());
+//        spout.enqueue(status);
+        producer.send(topicToSendTo, status);
       }
 
       @Override
@@ -51,6 +54,11 @@ public class StreamSource {
       }
     });
     twitterStream.sample();
+//    Topology stormTopology = new Topology();
+//    stormTopology.setSpout(spout);
+//    stormTopology.setBolt(new BoltWrapper("group-by-bolt","spout",new GroupByLanguageBolt(),1));
+//    stormTopology.setBolt(new BoltWrapper("print-bolt", "group-by-bolt", new PrintBolt(),2));
+//    stormTopology.submit();
   }
 
   private static Configuration getConfig() {

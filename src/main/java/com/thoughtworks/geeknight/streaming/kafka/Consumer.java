@@ -3,11 +3,12 @@ package com.thoughtworks.geeknight.streaming.kafka;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import twitter4j.Status;
 
 import java.util.*;
 
 public class Consumer {
-  private KafkaConsumer<String, String> consumer;
+  private KafkaConsumer<String, Status> consumer;
   private Properties consumerProperties;
   private int pollDuration;
 
@@ -29,14 +30,18 @@ public class Consumer {
     consumer.close();
   }
 
-  public List<String> process(){
-    ConsumerRecords<String, String> records = consumer.poll(pollDuration);
+  public Map<String,Integer> process(){
+    ConsumerRecords<String, Status> records = consumer.poll(pollDuration);
     if(records.isEmpty()){
-      return Collections.emptyList();
+      return Collections.emptyMap();
     }
-    List<String> values = new ArrayList<>();
-    for (ConsumerRecord<String, String> record : records) {
-     values.add(record.value());
+    Map<String,Integer> values = new HashMap<>();
+    for (ConsumerRecord<String, Status> record : records) {
+     String language = record.value().getLang();
+     if(values.containsKey(language))
+       values.put(language, values.get(language) + 1);
+     else
+       values.put(language, 0);
     }
     return values;
   }
@@ -46,7 +51,7 @@ public class Consumer {
     Properties consumerProperties = new Properties();
     consumerProperties.setProperty("bootstrap.servers", "localhost:9092");
     consumerProperties.setProperty("key.deserializer","org.apache.kafka.common.serialization.StringDeserializer");
-    consumerProperties.setProperty("value.deserializer","org.apache.kafka.common.serialization.StringDeserializer");
+    consumerProperties.setProperty("value.deserializer","com.thoughtworks.geeknight.streaming.kafka.StatusDeserializer");
     consumerProperties.setProperty("group.id","kafka-consumer-1");
     return consumerProperties;
   }
@@ -60,19 +65,29 @@ public class Consumer {
     consumer.subscribe(topics);
     consumer.setPollDuration(2000);
 
-
+    Map<String,Integer> languageCount = new HashMap<>();
     while(timeout < 1000){
-      List<String> values = consumer.process();
+      Map<String, Integer> values = consumer.process();
       if(!values.isEmpty()){
-        for (String value: values) {
-          System.out.println(value);
+        for (String language: values.keySet()) {
+          if(languageCount.containsKey(language))
+            languageCount.put(language, languageCount.get(language)+values.get(language));
+          else
+            languageCount.put(language, values.get(language));
         }
       }
+      printCountMap(languageCount);
       timeout ++;
     }
 
     consumer.close();
 
+  }
+
+  private static void printCountMap(Map<String, Integer> countMap) {
+    for (String key : countMap.keySet()){
+      System.out.println(key + " : " + countMap.get(key));
+    }
   }
 }
 
