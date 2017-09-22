@@ -8,7 +8,7 @@ import java.util.Properties;
 
 public class Producer {
   private Properties producerProperties;
-  private KafkaProducer producer;
+  private KafkaProducer<String, StatusWrapper> producer;
 
   public Producer(){
     producerProperties = getProperties();
@@ -28,7 +28,7 @@ public class Producer {
     producer.send(new ProducerRecord(topic, value));
   }
 
-  public void send(String topic, Status value){
+  public void send(String topic, StatusWrapper value){
     producer.send(new ProducerRecord(topic, value));
   }
 

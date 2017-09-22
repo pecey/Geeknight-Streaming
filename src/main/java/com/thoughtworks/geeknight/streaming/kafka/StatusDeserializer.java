@@ -1,32 +1,27 @@
 package com.thoughtworks.geeknight.streaming.kafka;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.common.serialization.Deserializer;
-import twitter4j.Status;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.Map;
 
-public class StatusDeserializer  implements Deserializer{
+public class StatusDeserializer  implements Deserializer<StatusWrapper>{
   @Override
   public void configure(Map map, boolean b) {
 
   }
 
   @Override
-  public Status deserialize(String s, byte[] bytes) {
+  public StatusWrapper deserialize(String s, byte[] bytes) {
+    ObjectMapper mapper = new ObjectMapper();
+    StatusWrapper status = null;
     try {
-      ByteArrayInputStream byteStream = new ByteArrayInputStream(bytes);
-      ObjectInputStream objectStream = new ObjectInputStream(byteStream);
+      status = mapper.readValue(bytes, StatusWrapper.class);
+    } catch (Exception e) {
 
-      Object o = objectStream.readObject();
-
-      return (Status) o;
-    } catch (IOException | ClassNotFoundException e) {
       e.printStackTrace();
     }
-    return null;
+    return status;
   }
 
   @Override

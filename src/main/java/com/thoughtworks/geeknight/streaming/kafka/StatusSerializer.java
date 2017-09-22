@@ -1,36 +1,25 @@
 package com.thoughtworks.geeknight.streaming.kafka;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.common.serialization.Serializer;
-import twitter4j.Status;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.Map;
-
-public class StatusSerializer implements Serializer {
+public class StatusSerializer implements Serializer<StatusWrapper> {
   @Override
   public void configure(Map map, boolean b) {
 
   }
 
-  public byte[] serialize(String s, Status o) {
-
+  @Override
+  public byte[] serialize(String s, StatusWrapper status) {
+    byte[] retVal = null;
+    ObjectMapper objectMapper = new ObjectMapper();
     try {
-      ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-      ObjectOutputStream objectStream = new ObjectOutputStream(byteStream);
-      objectStream.writeObject(o);
-      objectStream.close();
-      return byteStream.toByteArray();
-    } catch (IOException e) {
+      retVal = objectMapper.writeValueAsString(status).getBytes();
+    } catch (Exception e) {
       e.printStackTrace();
     }
-    return new byte[0];
-  }
-
-  @Override
-  public byte[] serialize(String s, Object o) {
-    return new byte[0];
+    return retVal;
   }
 
   @Override

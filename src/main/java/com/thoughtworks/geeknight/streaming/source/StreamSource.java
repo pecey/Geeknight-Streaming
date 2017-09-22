@@ -1,6 +1,7 @@
 package com.thoughtworks.geeknight.streaming.source;
 
 import com.thoughtworks.geeknight.streaming.kafka.Producer;
+import com.thoughtworks.geeknight.streaming.kafka.StatusWrapper;
 import com.thoughtworks.geeknight.streaming.storm.*;
 import twitter4j.*;
 import twitter4j.conf.Configuration;
@@ -25,7 +26,7 @@ public class StreamSource {
       @Override
       public void onStatus(Status status) {
 //        spout.enqueue(status);
-        producer.send(topicToSendTo, status);
+        producer.send(topicToSendTo, new StatusWrapper(status));
       }
 
       @Override
