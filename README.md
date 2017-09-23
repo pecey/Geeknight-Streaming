@@ -1,4 +1,4 @@
-#Streaming your data
+# Streaming your data
 
 ### Configuration
 This project streams data using the Twitter API.
