@@ -1,13 +1,11 @@
 package com.thoughtworks.geeknight.streaming.source;
 
+import com.google.common.io.Resources;
 import com.thoughtworks.geeknight.streaming.kafka.Producer;
 import com.thoughtworks.geeknight.streaming.kafka.StatusWrapper;
-import com.thoughtworks.geeknight.streaming.storm.*;
 import twitter4j.*;
 import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
-
-import com.google.common.io.Resources;
 
 import java.io.IOException;
 import java.io.InputStream;

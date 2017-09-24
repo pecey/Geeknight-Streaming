@@ -1,6 +1,6 @@
 # Streaming your data
 
-#### Visualisation
+### Visualisation
 
 We will be using redis to store counts. `redis-visualize` is a package which gives us a dashboard on topic of redis.
 
@@ -8,7 +8,7 @@ Run `npm install -g redis-visualize` to install the package.
 
 To start, `redis-visualize`. By default, it will start on port 8079.
 
-### Configuration
+### API Configuration
 This project streams data using the Twitter API.
 
 It reads the credentials from `src/resources/config.properties`. 
