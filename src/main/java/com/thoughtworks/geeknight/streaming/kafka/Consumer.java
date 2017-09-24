@@ -1,6 +1,7 @@
 package com.thoughtworks.geeknight.streaming.kafka;
 
 import com.thoughtworks.geeknight.streaming.redis.RedisConnector;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
@@ -32,10 +33,19 @@ public class Consumer {
 
     private void process() {
         ConsumerRecords<String, StatusWrapper> records = consumer.poll(pollDuration);
+        RedisConnector connector = new RedisConnector();
         if (!records.isEmpty()) {
-            RedisConnector connector = new RedisConnector();
-            records.iterator().forEachRemaining(record -> connector.increment(record.value().getLanguage()));
-        }
+            for(ConsumerRecord<String,StatusWrapper> record: records){
+                if (!"en".equals(record.value().getLanguage())) {
+                    return;
+                }
+                if(record.value().getHashtags().size() == 0){
+                    return;
+                }
+                connector.increment(record.value().getCountry());
+                System.out.println("Record inserted. Key : " + record.value().getCountry());
+                }
+            }
     }
 
 
