@@ -1,10 +1,12 @@
 package com.thoughtworks.geeknight.streaming.kafka;
 
-import org.apache.kafka.clients.consumer.ConsumerRecord;
+import com.thoughtworks.geeknight.streaming.redis.RedisConnector;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
 
 public class Consumer {
     private KafkaConsumer<String, StatusWrapper> consumer;
@@ -28,21 +30,13 @@ public class Consumer {
         consumer.close();
     }
 
-  private Map<String,Integer> process(){
-    ConsumerRecords<String, StatusWrapper> records = consumer.poll(pollDuration);
-    if(records.isEmpty()){
-      return Collections.emptyMap();
+    private void process() {
+        ConsumerRecords<String, StatusWrapper> records = consumer.poll(pollDuration);
+        if (!records.isEmpty()) {
+            RedisConnector connector = new RedisConnector();
+            records.iterator().forEachRemaining(record -> connector.increment(record.value().getLanguage()));
+        }
     }
-    Map<String,Integer> values = new HashMap<>();
-    for (ConsumerRecord<String, StatusWrapper> record : records) {
-     String language = record.value().getLanguage();
-     if(values.containsKey(language))
-       values.put(language, values.get(language) + 1);
-     else
-       values.put(language, 0);
-    }
-    return values;
-  }
 
 
     private static Properties getProperties() {
@@ -57,34 +51,13 @@ public class Consumer {
     public static void main(String[] args) {
 
         Consumer consumer = new Consumer();
-        int timeout = 0;
 
         List<String> topics = Collections.singletonList("test");
         consumer.subscribe(topics);
         consumer.setPollDuration(2000);
 
-        Map<String, Integer> languageCount = new HashMap<>();
-        while (timeout < 1000) {
-            Map<String, Integer> values = consumer.process();
-            if (!values.isEmpty()) {
-                for (String language : values.keySet()) {
-                    if (languageCount.containsKey(language))
-                        languageCount.put(language, languageCount.get(language) + values.get(language));
-                    else
-                        languageCount.put(language, values.get(language));
-                }
-            }
-            printCountMap(languageCount);
-            timeout++;
-        }
-
-        consumer.close();
-
-    }
-
-    private static void printCountMap(Map<String, Integer> countMap) {
-        for (String key : countMap.keySet()) {
-            System.out.println(key + " : " + countMap.get(key));
+        while (true) {
+            consumer.process();
         }
     }
 }
