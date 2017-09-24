@@ -3,6 +3,7 @@ package com.thoughtworks.geeknight.streaming.beam;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.geeknight.streaming.kafka.StatusDeserializer;
 import com.thoughtworks.geeknight.streaming.kafka.StatusWrapper;
+import com.thoughtworks.geeknight.streaming.redis.RedisConnector;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.coders.Coder;
 import org.apache.beam.sdk.coders.CoderException;
@@ -23,6 +24,7 @@ import java.util.List;
 
 public class TweetProcessingPipeline {
     public static void main(String[] args) {
+        RedisConnector connector = new RedisConnector();
         PipelineOptions options = PipelineOptionsFactory.create();
         Pipeline pipeline = Pipeline.create(options);
         pipeline.apply(KafkaIO.<String, StatusWrapper>read()
@@ -34,7 +36,8 @@ public class TweetProcessingPipeline {
                 .apply(ParDo.of(new DoFn<KafkaRecord<String, StatusWrapper>, Void>() {
             @ProcessElement
             public void processElement(ProcessContext context){
-                System.out.println(context.element().getKV().getValue().getLanguage());
+                String language = context.element().getKV().getValue().getLanguage();
+                connector.increment(language);
             }
         }));
 

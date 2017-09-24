@@ -17,6 +17,7 @@
         <guava.version>23.0</guava.version>
         <maven.version>3.7.0</maven.version>
         <java.version>1.8</java.version>
+        <redis.version>2.9.0</redis.version>
     </properties>
 
 
@@ -87,6 +88,13 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
             <version>${jackson.version}</version>
+        </dependency>
+
+        <!--Redis-->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>${redis.version}</version>
         </dependency>
     </dependencies>
 
